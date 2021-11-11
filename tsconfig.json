@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": [
+      "dom",
+      "es7",
+      "ES2019",
+      "es2020"
+    ],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "es2015",
+    "allowJs": true,
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "~/*": [
+        "./frontend/src/*"
+      ]
+    }
+  }
+}

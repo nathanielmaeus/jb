@@ -1,0 +1,25 @@
+.root {
+  display: flex;
+  gap: 16px;
+  padding: 8px;
+  border-radius: 4px;
+  
+  &:hover {
+    background-color: #eee;
+  }
+}
+
+.avatar {
+  height: 50px;
+  margin-top: 8px;
+  min-width: 50px;
+  background-color: #6f6666;
+  border-radius: 50%;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.author {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
