@@ -29,15 +29,17 @@ const Messages = () => {
   }, []);
 
   return (
-    <div>
-      <span>Items</span>
-      <input
-        className={styles.input}
-        type="number"
-        min={15}
-        value={size}
-        onChange={(e) => setSize(+e.target.value)}
-      />
+    <>
+      <div>
+        <span>Items</span>
+        <input
+          className={styles.input}
+          type="number"
+          min={15}
+          value={size}
+          onChange={(e) => setSize(+e.target.value)}
+        />
+      </div>
       <div className={styles.loader}>
         {status === Status.loading && "Loading..."}
       </div>
@@ -47,7 +49,7 @@ const Messages = () => {
         nextItems={nextMessages}
         renderItem={renderItem}
       />
-    </div>
+    </>
   );
 };
 

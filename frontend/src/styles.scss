@@ -1,11 +1,12 @@
 .root {
   display: flex;
   flex-direction: column;
-  justify-content:center;
   position: relative;
   max-width: 1200px;
   min-width: 600px;
+  height: 100%;
   margin: 0 auto;
+  padding: 16px 0;
 }
 
 .title {
@@ -23,6 +24,5 @@
   padding: 8px;
   border: 1px solid #eee;
   border-radius: 4px;
-  min-height: 100px;
   font-family: inherit;
 }
