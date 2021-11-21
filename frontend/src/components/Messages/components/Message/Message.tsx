@@ -1,4 +1,4 @@
-import { FC, memo, useEffect, useRef } from "react";
+import { FC, memo, useCallback, useEffect, useRef } from "react";
 import { Message } from "../../../../../../types";
 
 import styles from "./styles.scss";
@@ -8,26 +8,30 @@ type MessagesProps = {
   onResize: (v: ResizeEventProps) => void;
 };
 
-export type ResizeEventProps = { offsetHeight: number; id: string };
+export type ResizeEventProps = {
+  offsetHeight: number;
+  id: string;
+};
 
 const Message: FC<MessagesProps> = ({ message, onResize }) => {
   const resizeObserver = useRef<ResizeObserver | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
+
+  const onSizeChange = useCallback(() => {
+    if (!ref.current || !ref.current.offsetHeight) return;
+
+    onResize({
+      offsetHeight: ref.current.offsetHeight,
+      id: message.id,
+    });
+  }, [message.id, onResize]);
 
   useEffect(() => {
     if (!ref.current) {
       return;
     }
 
-    const onSizeChange = () => {
-      if (!ref.current || !ref.current?.offsetHeight) return;
-
-      onResize({
-        offsetHeight: ref.current?.offsetHeight,
-        id: message.id,
-      });
-    };
-
+    onSizeChange();
     resizeObserver.current = new ResizeObserver(onSizeChange);
     resizeObserver.current.observe(ref.current);
 
@@ -35,19 +39,10 @@ const Message: FC<MessagesProps> = ({ message, onResize }) => {
       resizeObserver.current?.disconnect();
       resizeObserver.current = null;
     };
-  }, [message.id, onResize]);
-
-  useEffect(() => {
-    if (!ref.current || !ref.current?.offsetHeight) return;
-
-    onResize({
-      offsetHeight: ref.current?.offsetHeight,
-      id: message.id,
-    });
-  }, [message.id, onResize]);
+  }, [onSizeChange]);
 
   return (
-    <div className={styles.root} ref={ref} data-key={message.id}>
+    <div className={styles.root} ref={ref} key={message.id}>
       <div
         className={styles.avatar}
         style={{ backgroundImage: `url(${message.avatarUrl})` }}

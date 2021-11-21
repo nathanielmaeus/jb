@@ -1,6 +1,7 @@
 import { action, atom } from "nanostores";
 import { Message } from "../../../types";
 import { getMessagesApi } from "./api";
+import { debounce } from "~/helpers";
 
 export enum Status {
   initial = "initial",
@@ -9,20 +10,11 @@ export enum Status {
   failed = "failed",
 }
 
-function debounce(clb: (v: number) => void, ms: number) {
-  let timer: number | null;
-  return (e: number) => {
-    timer && window.clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      clb(e);
-    }, ms);
-  };
-}
-
 export const $messages = atom<Message[]>([]);
 export const $nextMessages = atom<Message[]>([]);
 export const $nextId = atom<number | null>(null);
 export const $status = atom<Status>(Status.initial);
+export const $initialSize = atom<number>(0);
 
 export const getMessages = action(
   $messages,
@@ -74,7 +66,7 @@ const getMessagesFromScratch = action(
       $status.set(Status.loaded);
       $nextId.set(next);
       $nextMessages.set(newMessages);
-
+      $initialSize.set(size);
       $messages.set(newMessages);
     } catch (e) {
       console.error(e);

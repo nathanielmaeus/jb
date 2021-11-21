@@ -6,7 +6,9 @@
   "scripts": {
     "start:server": "ts-node-dev server/index.ts",
     "start:web": "webpack serve --config=./frontend/webpack.config.js",
-    "start": "run-p start:*"
+    "start": "run-p start:*",
+    "test": "tsm node_modules/uvu/bin.js",
+    "watch": "watchlist frontend -- yarn test"
   },
   "dependencies": {
     "@nanostores/react": "^0.1.2",
@@ -51,7 +53,9 @@
     "prettier": "^2.3.2",
     "ts-loader": "^8.0.14",
     "ts-node-dev": "^1.1.8",
+    "tsm": "^2.1.4",
     "typescript-eslint": "^0.0.1-alpha.0",
+    "uvu": "^0.5.2",
     "webpack": "^5.11.1",
     "webpack-cli": "^4.3.1",
     "webpack-dev-server": "^3.11.1"

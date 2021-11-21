@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import { Message } from "../../../../../../types";
+import { debounce } from "~/helpers";
 import { ResizeEventProps } from "../Message/Message";
 import Virtual, { Config } from "./helpers/virtual";
 import styles from "./styles.scss";
@@ -27,16 +28,6 @@ function throttle(callee: (...v: unknown[]) => void, timeout: number) {
   };
 }
 
-export function usePrevious<T>(state: T): T | undefined {
-  const ref = useRef<T>();
-
-  useEffect(() => {
-    ref.current = state;
-  });
-
-  return ref.current;
-}
-
 type Range = {
   start: number;
   end: number;
@@ -49,94 +40,52 @@ type VirtualListProps = {
   nextItems: Message[];
   renderItem: (item: Message, onResize: HandleResizeCallback) => ReactNode;
   onGetNewItems: () => void;
+  initialSize: number;
 };
 
 const VIRTUAL_LIST_PARAMS: Config = {
   keeps: 45,
-  estimateSize: 150,
+  estimatedSize: 115,
   buffer: 25,
   uniqueIds: [],
 };
-const bottomStyles = { width: "100%", height: "0px" };
 
 const VirtualList: FC<VirtualListProps> = ({
   items,
   nextItems,
   onGetNewItems,
   renderItem,
+  initialSize,
 }) => {
   const [range, setRange] = useState<Range>({} as Range);
 
   const rootScrollElementRef = useRef<HTMLDivElement | null>(null);
-  const bottomElementRef = useRef<HTMLDivElement | null>(null);
-
   const virtual = useRef<Virtual | null>(null);
   const isLoading = useRef<boolean>(false);
-
-  const prevItems = usePrevious<typeof items>(items);
 
   useEffect(() => {
     virtual.current = new Virtual(VIRTUAL_LIST_PARAMS, setRange);
     setRange(virtual.current.getRange());
-  }, []);
+  }, [initialSize]);
 
   useEffect(() => {
     if (!virtual.current) return;
 
-    const scrollToBottom = () => {
-      if (!bottomElementRef.current || !rootScrollElementRef.current) {
-        return;
-      }
-
-      const { current: scrollableElement } = rootScrollElementRef;
-      scrollableElement.scrollTop = bottomElementRef.current.offsetTop;
-
-      setTimeout(() => {
-        if (!rootScrollElementRef.current) {
-          return;
-        }
-
-        if (
-          scrollableElement.scrollTop + scrollableElement.clientHeight <
-          scrollableElement.scrollHeight
-        ) {
-          scrollToBottom();
-        }
-      }, 0);
-    };
-
-    const calculateOffset = () => {
-      return nextItems.reduce((acc, message) => {
-        if (!virtual.current) return acc;
-
-        const itemHeight =
-          virtual.current.heights.get(message.id) ||
-          virtual.current.averageHeight;
-        return acc + itemHeight;
-      }, 0);
-    };
-
-    const updateCurrentOffset = () => {
-      if (!rootScrollElementRef.current) {
-        return;
-      }
-      rootScrollElementRef.current.scrollTop = calculateOffset();
-    };
-
-    virtual.current.onUpdateIds(items.map((m) => m.id));
+    const ids = items.map((m) => m.id);
+    virtual.current.onUpdateIds(ids);
 
     requestAnimationFrame(() => {
-      if (!virtual.current) return;
-
-      virtual.current.onUpdateData();
-      updateCurrentOffset();
-
-      if (prevItems?.length === 0) {
-        scrollToBottom();
+      if (!virtual.current || !rootScrollElementRef.current) {
+        return;
       }
+
+      virtual.current.onUpdateRange();
+      const currentOffset = virtual.current.onGetShiftedOffset(nextItems);
+      rootScrollElementRef.current.scrollTop = currentOffset;
+
       isLoading.current = false;
     });
-  }, [items, nextItems, prevItems]);
+  }, [items, nextItems]);
 
   const loadNewItems = useCallback(() => {
     if (rootScrollElementRef.current?.scrollTop === 0) {
@@ -145,29 +94,20 @@ const VirtualList: FC<VirtualListProps> = ({
     }
   }, [onGetNewItems]);
 
-  const recalculateOffset = useCallback(() => {
-    if (!virtual.current) return;
-
-    const { heights, averageHeight, offsets } = virtual.current;
-
-    items.reduce((offsetAcc, item) => {
-      offsetAcc += heights.get(item.id) || averageHeight;
-      offsets.set(item.id, offsetAcc);
-      return offsetAcc;
-    }, 0);
-  }, [items]);
-
-  const handleResize = useCallback(
-    (data: ResizeEventProps) => {
-      if (!virtual.current) return;
-
-      virtual.current.onSaveHeight(data.id, data.offsetHeight);
-      if (!virtual.current.heights.get(data.id)) {
-        recalculateOffset();
-      }
-    },
-    [recalculateOffset],
+  const debouncedRecalculateOffset = useRef(
+    debounce((ref: Virtual) => {
+      ref.onRecalculateOffset();
+    }, 50),
   );
+
+  const handleResize = useCallback((data: ResizeEventProps) => {
+    if (!virtual.current || virtual.current.heights.has(data.id)) {
+      return;
+    }
+
+    virtual.current.onSaveHeight(data.id, data.offsetHeight);
+    debouncedRecalculateOffset.current(virtual.current);
+  }, []);
 
   const handleScroll = useCallback(() => {
     if (
@@ -199,7 +139,6 @@ const VirtualList: FC<VirtualListProps> = ({
       <div style={{ padding: `${padFront}px 0px ${padBehind}px` }}>
         {renderItems()}
       </div>
-      <div ref={bottomElementRef} style={bottomStyles} />
     </div>
   );
 };

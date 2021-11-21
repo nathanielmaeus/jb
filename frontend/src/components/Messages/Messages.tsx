@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useStore } from "@nanostores/react";
 import {
+  $initialSize,
   $messages,
   $nextMessages,
   $status,
@@ -17,8 +18,9 @@ const Messages = () => {
   const messages = useStore($messages);
   const nextMessages = useStore($nextMessages);
   const status = useStore($status);
+  const initialSize = useStore($initialSize);
 
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState(50);
 
   useEffect(() => {
     getMessagesFromScratchDebounced(size);
@@ -48,6 +50,7 @@ const Messages = () => {
         items={messages}
         nextItems={nextMessages}
         renderItem={renderItem}
+        initialSize={initialSize}
       />
     </>
   );

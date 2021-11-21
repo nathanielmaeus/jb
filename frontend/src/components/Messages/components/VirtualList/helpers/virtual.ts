@@ -1,7 +1,7 @@
-const DIRECTION = {
-  UP: "UP",
-  DOWN: "DOWN",
-};
+enum DIRECTION {
+  UP = "UP",
+  DOWN = "DOWN",
+}
 
 export type Range = {
   start: number;
@@ -12,49 +12,46 @@ export type Range = {
 
 export type Config = {
   keeps: number;
-  estimateSize: number;
+  estimatedSize: number;
   buffer: number;
   uniqueIds: string[];
 };
 
+type ObjectWithId = { id: string };
+
 export default class Virtual {
   private readonly config: Config;
-  private readonly onUpdateRange: (v: Range) => void;
-
-  private lastCalcIndex: number;
+  private readonly emitOnRangeHandler: (v: Range) => void;
   private offset: number;
-  private direction: string;
-  private range: Range;
+  private direction: DIRECTION;
 
+  range: Range;
   heights: Map<string, number>;
   offsets: Map<string, number>;
-  totalHeight: number | undefined;
-  averageHeight: number;
 
   constructor(config: Config, onUpdateRange: (v: Range) => void) {
     this.config = config;
-    this.onUpdateRange = onUpdateRange;
+    this.emitOnRangeHandler = onUpdateRange;
 
     this.heights = new Map();
     this.offsets = new Map();
-    this.totalHeight = 0;
-    this.averageHeight = 0;
-    this.lastCalcIndex = 0;
 
     this.offset = 0;
-    this.direction = "";
+    this.direction = DIRECTION.UP;
 
     this.range = {} as Range;
-    this.checkRange(0, config.keeps - 1);
+    this.syncRange(0, config.keeps - 1);
   }
 
-  getRange() {
-    const range = {} as Range;
-    range.start = this.range.start;
-    range.end = this.range.end;
-    range.padFront = this.range.padFront;
-    range.padBehind = this.range.padBehind;
-    return range;
+  getRange(): Range {
+    const { start, end, padFront, padBehind } = this.range;
+
+    return {
+      start,
+      end,
+      padFront,
+      padBehind,
+    };
   }
 
   getOffset(start: number) {
@@ -62,34 +59,20 @@ export default class Virtual {
   }
 
   onUpdateIds(newIds: string[]) {
-    this.heights.forEach((v, key) => {
-      if (!newIds.includes(key)) {
-        this.heights.delete(key);
-      }
-    });
     this.config.uniqueIds = newIds;
   }
 
   onSaveHeight(id: string, size: number) {
     this.heights.set(id, size);
-
-    if (typeof this.totalHeight !== "undefined") {
-      if (
-        this.heights.size <
-        Math.min(this.config.keeps, this.config.uniqueIds.length)
-      ) {
-        this.totalHeight = [...this.heights.values()].reduce(
-          (acc, val) => acc + val,
-          0,
-        );
-        this.averageHeight = Math.round(this.totalHeight / this.heights.size);
-      } else {
-        delete this.totalHeight;
-      }
-    }
   }
 
-  onUpdateData() {
+  onGetShiftedOffset<T extends ObjectWithId[]>(newItems: T) {
+    return newItems.reduce((acc, message) => {
+      return acc + (this.heights.get(message.id) || this.config.estimatedSize);
+    }, 0);
+  }
+
+  onUpdateRange() {
     const start = Math.max(this.range.start, 0);
     this.updateRange(start, this.getEndByStart(start));
   }
@@ -105,29 +88,41 @@ export default class Virtual {
     }
   }
 
-  handleScrollUp() {
-    const overs = this.getCurrentRange();
+  onRecalculateOffset() {
+    const { heights, offsets, config } = this;
 
-    if (overs > this.range.start) {
+    let offsetAcc = 0;
+
+    config.uniqueIds.forEach((id) => {
+      offsets.set(id, offsetAcc);
+      offsetAcc += heights.get(id) || config.estimatedSize;
+    });
+  }
+
+  handleScrollUp() {
+    const calculatedStart = this.calculateCurrentRange();
+
+    if (calculatedStart > this.range.start) {
       return;
     }
 
-    const start = Math.max(overs - this.config.buffer, 0);
-    this.checkRange(start, this.getEndByStart(start));
+    const start = Math.max(calculatedStart - this.config.buffer, 0);
+    this.syncRange(start, this.getEndByStart(start));
   }
 
   handleScrollDown() {
-    const overs = this.getCurrentRange();
+    const calculatedStart = this.calculateCurrentRange();
 
-    if (overs < this.range.start + this.config.buffer) {
+    if (calculatedStart < this.range.start + this.config.buffer) {
       return;
     }
 
-    this.checkRange(overs, this.getEndByStart(overs));
+    this.syncRange(calculatedStart, this.getEndByStart(calculatedStart));
   }
 
-  getCurrentRange() {
+  calculateCurrentRange() {
     const offset = this.offset;
+
     if (offset <= 0) {
       return 0;
     }
@@ -157,24 +152,20 @@ export default class Virtual {
     let offset = this.offsets.get(this.config.uniqueIds[givenIndex]);
 
     if (typeof offset !== "number") {
-      offset = givenIndex * this.getAverageHeight();
+      offset = givenIndex * this.config.estimatedSize;
     }
-
-    this.lastCalcIndex = Math.max(this.lastCalcIndex, givenIndex - 1);
-    this.lastCalcIndex = Math.min(this.lastCalcIndex, this.getLastIndex());
 
     return offset;
   }
 
   getLastIndex() {
-    return this.config.uniqueIds.length - 1;
+    return Math.max(0, this.config.uniqueIds.length - 1);
   }
 
-  checkRange(start: number, end: number) {
-    const keeps = this.config.keeps;
-    const total = this.config.uniqueIds.length;
+  syncRange(start: number, end: number) {
+    const { keeps, uniqueIds } = this.config;
 
-    if (total <= keeps) {
+    if (uniqueIds.length <= keeps) {
       start = 0;
       end = this.getLastIndex();
     } else if (end - start < keeps - 1) {
@@ -191,7 +182,7 @@ export default class Virtual {
     this.range.end = end;
     this.range.padFront = this.calculateTopPadding();
     this.range.padBehind = this.calculateBottomPadding();
-    this.onUpdateRange(this.getRange());
+    this.emitOnRangeHandler(this.getRange());
   }
 
   getEndByStart(start: number) {
@@ -200,21 +191,17 @@ export default class Virtual {
   }
 
   calculateTopPadding() {
-    return this.getOffsetByIndex(this.range.start);
+    const { start } = this.range;
+    return this.getOffsetByIndex(start);
   }
 
   calculateBottomPadding() {
-    const end = this.range.end;
+    const { end } = this.range;
+
     const lastIndex = this.getLastIndex();
+    const lastIndexOffset = this.getOffsetByIndex(lastIndex);
+    const endOffset = this.getOffsetByIndex(end);
 
-    if (this.lastCalcIndex === lastIndex) {
-      return this.getOffsetByIndex(lastIndex) - this.getOffsetByIndex(end);
-    } else {
-      return (lastIndex - end) * this.getAverageHeight();
-    }
-  }
-
-  getAverageHeight() {
-    return this.averageHeight || this.config.estimateSize;
+    return lastIndexOffset - endOffset;
   }
 }

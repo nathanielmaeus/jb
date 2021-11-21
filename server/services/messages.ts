@@ -7,10 +7,10 @@ function generateMessages(count: number, lastMessageId: number): Message[] {
     .fill(0)
     .map(() => {
       return {
-        id: `${index++}`,
+        id: `${index}`,
         content: `${faker.lorem.sentences(
           Math.floor(Math.random() * 20),
-        )} by ${index}`,
+        )} by ${index++}`,
         author: faker.name.firstName() + " " + faker.name.lastName(),
         date: new Date().toISOString(),
         avatarUrl: faker.image.avatar(),
