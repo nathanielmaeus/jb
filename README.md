@@ -1,4 +1,6 @@
-# Virtual list
+# Chat
+
+Simple implementation of a chat with virtual list support.
 
 Setup:
 
