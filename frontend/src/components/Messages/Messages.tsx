@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import {
   $initialSize,
@@ -20,11 +20,9 @@ const Messages = () => {
   const status = useStore($status);
   const initialSize = useStore($initialSize);
 
-  const [size, setSize] = useState(50);
-
   useEffect(() => {
-    getMessagesFromScratchDebounced(size);
-  }, [size]);
+    getMessagesFromScratchDebounced(50);
+  }, []);
 
   const renderItem = useCallback((message, onResize) => {
     return <Message key={message.id} message={message} onResize={onResize} />;
@@ -32,16 +30,6 @@ const Messages = () => {
 
   return (
     <>
-      <div>
-        <span>Items</span>
-        <input
-          className={styles.input}
-          type="number"
-          min={15}
-          value={size}
-          onChange={(e) => setSize(+e.target.value)}
-        />
-      </div>
       <div className={styles.loader}>
         {status === Status.loading && "Loading..."}
       </div>
