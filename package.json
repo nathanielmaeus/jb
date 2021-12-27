@@ -4,19 +4,22 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:server": "ts-node-dev server/index.ts",
-    "start:web": "webpack serve --config=./frontend/webpack.config.js",
+    "start:server": "netlify dev",
+    "start:web": "webpack serve --config=./frontend/config/webpack.dev.js",
     "start": "run-p start:*",
+    "build": "webpack --config=./frontend/config/webpack.prod.js",
     "test": "tsm node_modules/uvu/bin.js",
     "watch": "watchlist frontend -- yarn test"
   },
   "dependencies": {
     "@nanostores/react": "^0.1.2",
+    "@netlify/functions": "^0.10.0",
     "body-parser": "^1.19.0",
     "classnames": "^2.3.1",
     "css-loader": "^5.0.1",
     "faker": "^5.1.0",
     "history": "4.10.1",
+    "mini-css-extract-plugin": "^2.4.5",
     "nanostores": "^0.5.4",
     "query-string": "^6.13.8",
     "react": "^17.0.1",
@@ -58,6 +61,7 @@
     "uvu": "^0.5.2",
     "webpack": "^5.11.1",
     "webpack-cli": "^4.3.1",
-    "webpack-dev-server": "^3.11.1"
+    "webpack-dev-server": "^3.11.1",
+    "webpack-merge": "^5.8.0"
   }
 }
