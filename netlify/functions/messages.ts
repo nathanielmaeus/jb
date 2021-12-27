@@ -1,5 +1,5 @@
 import { Handler } from "@netlify/functions";
-import { getMessages } from "../../server/services/messages";
+import { getMessages } from "../../server/messages";
 
 const headers = {
   "Access-Control-Allow-Origin": "*",

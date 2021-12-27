@@ -1,4 +1,4 @@
-import { Message, GetMessagesParamsApi } from "../../types";
+import { Message, GetMessagesParamsApi } from "../types";
 import * as faker from "faker";
 
 function generateMessages(count: number, lastMessageId: number): Message[] {
