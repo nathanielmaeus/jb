@@ -1,9 +1,11 @@
 import qs from "query-string";
 import { Message, GetMessagesParamsApi } from "../../../types";
 
+const URL = process.env.MY_URL;
+
 const getUrl = (endpoint: string, params?: Record<string, unknown>) => {
   const query = params ? qs.stringify(params) : "";
-  return `/.netlify/functions/${endpoint}${query ? `?${query}` : ""}`;
+  return `${URL}/.netlify/functions/${endpoint}${query ? `?${query}` : ""}`;
 };
 
 export async function getMessagesApi({
