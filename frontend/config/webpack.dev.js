@@ -1,6 +1,5 @@
 const { merge } = require('webpack-merge');
 const common = require("./webpack.common.js");
-const Dotenv = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
@@ -42,7 +41,6 @@ module.exports = merge(common, {
   },
 
   plugins: [
-    new Dotenv(),
     new HtmlWebpackPlugin({
       inject: true,
       template: path.resolve('./frontend/public/index.html'),
