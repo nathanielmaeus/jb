@@ -1,7 +1,10 @@
 import qs from "query-string";
 import { Message, GetMessagesParamsApi } from "../../../types";
 
-const URL = process.env.URL || "http://localhost:8888";
+const URL =
+  process.env.URL ||
+  "https://vigilant-euler-822bad.netlify.app" ||
+  "http://localhost:8888";
 
 const getUrl = (endpoint: string, params?: Record<string, unknown>) => {
   const query = params ? qs.stringify(params) : "";
