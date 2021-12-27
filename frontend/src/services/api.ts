@@ -1,7 +1,7 @@
 import qs from "query-string";
 import { Message, GetMessagesParamsApi } from "../../../types";
 
-const URL = process.env.URL || process.env.API_URL;
+const URL = process.env.API_URL;
 
 const getUrl = (endpoint: string, params?: Record<string, unknown>) => {
   const query = params ? qs.stringify(params) : "";
