@@ -1,11 +1,9 @@
 import qs from "query-string";
 import { Message, GetMessagesParamsApi } from "../../../types";
 
-const API_ENV_URL = process.env.API_ENV_URL;
-
 const getUrl = (endpoint: string, params?: Record<string, unknown>) => {
   const query = params ? qs.stringify(params) : "";
-  return `${API_ENV_URL}/.netlify/functions/${endpoint}${
+  return `${process.env.API_ENV_URL}/.netlify/functions/${endpoint}${
     query ? `?${query}` : ""
   }`;
 };

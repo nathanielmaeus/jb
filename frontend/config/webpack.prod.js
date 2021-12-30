@@ -1,7 +1,7 @@
 const { merge } = require("webpack-merge");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const common = require("./webpack.common.js");
-const webpack = require("webpack");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = merge(common, {
   mode: "production",
@@ -24,5 +24,8 @@ module.exports = merge(common, {
       },
     ],
   },
-  plugins: [new MiniCssExtractPlugin(), new webpack.DefinePlugin({ "process.env.API_ENV_URL": JSON.stringify(process.env.API_ENV_URL || "https://localhost:8080") })],
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new CleanWebpackPlugin(),
+  ],
 });
