@@ -7,7 +7,7 @@
     "start:server": "netlify dev",
     "start:web": "webpack serve --config=./frontend/config/webpack.dev.js",
     "start": "run-p start:*",
-    "build": "export API_ENV_URL=$URL && webpack --config=./frontend/config/webpack.prod.js",
+    "build": "API_ENV_URL=$URL webpack --config=./frontend/config/webpack.prod.js",
     "test": "tsm node_modules/uvu/bin.js",
     "watch": "watchlist frontend -- yarn test"
   },

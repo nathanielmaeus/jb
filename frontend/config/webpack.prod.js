@@ -24,5 +24,5 @@ module.exports = merge(common, {
       },
     ],
   },
-  plugins: [new MiniCssExtractPlugin(), new webpack.DefinePlugin({ API_ENV_URL: JSON.stringify(process.env.API_ENV_URL || "https://localhost:8080") })],
+  plugins: [new MiniCssExtractPlugin(), new webpack.DefinePlugin({ "process.env.API_ENV_URL": JSON.stringify(process.env.API_ENV_URL || "https://localhost:8080") })],
 });
