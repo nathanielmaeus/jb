@@ -1,19 +1,12 @@
 import { Handler } from "@netlify/functions";
 import { getMessages } from "../../server/messages";
 
-const headers = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-};
-
 const handler: Handler = async (event) => {
   const params = event.queryStringParameters;
 
   if (!params) {
     return {
       statusCode: 400,
-      headers,
       body: JSON.stringify({ message: "mandatory parameters are missing" }),
     };
   }
@@ -28,7 +21,6 @@ const handler: Handler = async (event) => {
 
   return {
     statusCode: 200,
-    headers,
     body: JSON.stringify(data),
   };
 };
