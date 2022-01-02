@@ -47,7 +47,7 @@ const Message: FC<MessagesProps> = ({ message, onResize }) => {
         className={styles.avatar}
         style={{ backgroundImage: `url(${message.avatarUrl})` }}
       />
-      <div>
+      <div className={styles.message}>
         <div className={styles.author}>{message.author}</div>
         <div className={styles.content}>{message.content}</div>
       </div>

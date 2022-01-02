@@ -9,11 +9,13 @@ function generateMessages(count: number, lastMessageId: number): Message[] {
       return {
         id: `${index}`,
         content: `${faker.lorem.sentences(
-          Math.floor(Math.random() * 20),
+          Math.floor(Math.random() * 10),
         )} by ${index++}`,
         author: faker.name.firstName() + " " + faker.name.lastName(),
         date: new Date().toISOString(),
-        avatarUrl: faker.image.avatar(),
+        avatarUrl: `https://i.pravatar.cc/150?${Math.floor(
+          Math.random() * 10000,
+        )}`, //faker.image.avatar(),
       };
     })
     .reverse();
