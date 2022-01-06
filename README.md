@@ -1,6 +1,6 @@
 # Chat
 
-Simple implementation of a chat with virtual list support.
+Simple implementation of a chat with a virtual list support. It means that it supports over 100k messages in the same time.
 
 Setup:
 
