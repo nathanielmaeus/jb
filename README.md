@@ -1,6 +1,6 @@
 # Chat
 
-Simple implementation of a chat with a virtual list support. It means that it supports over 100k messages at the same time.
+Simple implementation of a chat with a virtual list support. It supports over 100k messages at the same time.
 
 Available on https://chatvl.netlify.app
 
